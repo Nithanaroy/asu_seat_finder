@@ -1,0 +1,2 @@
+http://liamkaufman.com/blog/2012/03/08/scraping-web-pages-with-jquery-nodejs-and-jsdom/
+https://github.com/tmpvar/jsdom
