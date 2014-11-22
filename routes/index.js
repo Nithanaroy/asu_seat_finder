@@ -1,26 +1,25 @@
 var express = require('express');
-var router = express.Router();
-var fs = require('fs');
-var request = require('request');
-var jsdom = require('jsdom');
-var CronJob = require('cron').CronJob;
-var Q = require('q');
-var globals = require('../utils/globals').constants;
-var nodemailer = require('nodemailer');
+    router = express.Router(),
+    fs = require('fs'),
+    request = require('request'),
+    jsdom = require('jsdom'),
+    CronJob = require('cron').CronJob,
+    Q = require('q'),
+    globals = require('../utils/globals').constants,
+    nodemailer = require('nodemailer');
 
-/* GET home page. */
-router.get('/', function(req, res) {
+exports.home = function(req, res) {
     res.render('index', {
         title: 'ASU Seat Finder'
     });
-});
+};
 
-router.get('/track', function(req, res) {
+exports.track = function(req, res) {
     console.log('Method: ', 'track');
     var classes_to_track = req.query.classes;
     set_up_cron_job(classes_to_track);
     res.send();
-});
+};
 
 
 function set_up_cron_job(classes_to_track) {
@@ -197,7 +196,7 @@ function send_email(html_msg) {
 }
 
 
-router.get('/stoptrack', function(req, res) {
+exports.stoptrack = function(req, res) {
 
     console.log('Method: ', 'In stop tracking');
 
@@ -208,6 +207,4 @@ router.get('/stoptrack', function(req, res) {
         console.log('No jobs are running');
     }
     res.send();
-});
-
-module.exports = router;
+};
