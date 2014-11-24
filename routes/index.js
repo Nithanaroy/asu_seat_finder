@@ -1,5 +1,5 @@
 var express = require('express');
-    router = express.Router(),
+router = express.Router(),
     fs = require('fs'),
     request = require('request'),
     jsdom = require('jsdom'),
@@ -208,3 +208,13 @@ exports.stoptrack = function(req, res) {
     }
     res.send();
 };
+
+exports.getstatus = function(req, res) {
+    if (globals.job) {
+        console.log(globals.job._callbacks[0]);
+        globals.job._callbacks[0]();
+        res.send("Tracking request sent. You will receive an email(s) if any classes open, else no notification will be received");
+    } else {
+        res.send("No jobs currently running");
+    }
+}

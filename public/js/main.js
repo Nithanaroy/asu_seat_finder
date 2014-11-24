@@ -23,4 +23,13 @@ $(function() {
             }
         });
     });
+
+    $("#get-status-btn").click(function() {
+        $.ajax({
+            url: '/getstatus',
+            success: function(data) {
+                $("#alert-msg").text(data);
+            }
+        });
+    })
 });
