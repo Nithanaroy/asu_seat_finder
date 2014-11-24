@@ -2,9 +2,6 @@ var path = require('path');
 
 var rootPath = process.cwd();
 
-console.log('path=',rootPath);
-
-
 module.exports = {
     development: {
         rootPath: rootPath,
