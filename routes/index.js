@@ -35,7 +35,7 @@ function set_up_cron_job(classes_to_track) {
     };
 
     job = new CronJob({
-        cronTime: '*/15 * * * * *',
+        cronTime: '0 */15 * * * *',
         onTick: function() {
             console.log('\r\n', new Date(), "Running CRON");
             fetch_classes_and_email(classes_to_track);
