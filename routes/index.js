@@ -53,7 +53,7 @@ function fetch_classes_and_email(classes_to_track) {
     var options = {
         url: 'https://webapp4.asu.edu/catalog/classlist?s=CSE&l=grad&t=2151&e=all&hon=F',
         headers: {
-            'Cookie': 'onlineCampusSelection=C; JSESSIONID=5B44C5C29D899E5DD0AF412869FD80F0.catalog2; webfxtab_my-programs-tabs=1; ASUWEBAUTH=ST-2493-ezkwwdbnvItL5JV1cLDE-03_8a90ec5d-fa5f-432e-8719-b4754dcf5779; SSONAME=Nitin; MOBILE_DETECTION=false; myclasses=2151; _ga=GA1.2.1181178433.1416636901; __utma=59190898.1181178433.1416636901.1416704187.1416760337.4; __utmc=59190898; __utmz=59190898.1416760337.4.2.utmcsr=myasucourses.asu.edu|utmccn=(referral)|utmcmd=referral|utmcct=/webapps/portal/execute/tabs/tabAction; _op_aixPageId=a2_7f2a17bc-64d9-4feb-b934-46aca23cf84a; __utma=137925942.445756493.1415131804.1416763335.1416794695.41; __utmb=137925942.1.10.1416794695; __utmc=137925942; __utmz=137925942.1415131804.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none)'
+            'Cookie': 'onlineCampusSelection=C; JSESSIONID=6AAA138015A09E63A518481858A2A1FE.catalog2; webfxtab_my-programs-tabs=1; MOBILE_DETECTION=false; ASUWEBAUTH=ST-11404-XC4Th99da4sWZNFRabvd-04_0606efc8-a9b4-415f-8973-c9e966f7144a; SSONAME=Nitin; myclasses=2151; __utma=59190898.1181178433.1416636901.1416808399.1416817408.7; __utmc=59190898; __utmz=59190898.1416817408.7.4.utmcsr=webapp4.asu.edu|utmccn=(referral)|utmcmd=referral|utmcct=/myasu/; _ga=GA1.2.1181178433.1416636901; _op_aixPageId=a2_a663d823-6b76-4be0-a58f-928274c0127d; __utmt=1; __utma=137925942.445756493.1415131804.1416805201.1416846635.45; __utmb=137925942.1.10.1416846635; __utmc=137925942; __utmz=137925942.1415131804.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none)'
         }
     }
 
@@ -211,7 +211,6 @@ exports.stoptrack = function(req, res) {
 
 exports.getstatus = function(req, res) {
     if (globals.job) {
-        console.log(globals.job._callbacks[0]);
         globals.job._callbacks[0]();
         res.send("Tracking request sent. You will receive an email(s) if any classes open, else no notification will be received");
     } else {
