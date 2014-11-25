@@ -53,7 +53,7 @@ function fetch_classes_and_email(classes_to_track) {
     var options = {
         url: 'https://webapp4.asu.edu/catalog/classlist?s=CSE&l=grad&t=2151&e=all&hon=F',
         headers: {
-            'Cookie': 'onlineCampusSelection=C; JSESSIONID=6AAA138015A09E63A518481858A2A1FE.catalog2; webfxtab_my-programs-tabs=1; MOBILE_DETECTION=false; ASUWEBAUTH=ST-11404-XC4Th99da4sWZNFRabvd-04_0606efc8-a9b4-415f-8973-c9e966f7144a; SSONAME=Nitin; myclasses=2151; __utma=59190898.1181178433.1416636901.1416808399.1416817408.7; __utmc=59190898; __utmz=59190898.1416817408.7.4.utmcsr=webapp4.asu.edu|utmccn=(referral)|utmcmd=referral|utmcct=/myasu/; _ga=GA1.2.1181178433.1416636901; _op_aixPageId=a2_a663d823-6b76-4be0-a58f-928274c0127d; __utmt=1; __utma=137925942.445756493.1415131804.1416805201.1416846635.45; __utmb=137925942.1.10.1416846635; __utmc=137925942; __utmz=137925942.1415131804.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none)'
+            'Cookie': 'onlineCampusSelection=C; JSESSIONID=A6BA31011EDEE07306A1A4D899DFACB8.catalog2; webfxtab_my-programs-tabs=1; MOBILE_DETECTION=false; ASUWEBAUTH=ST-44772-79fUOyKsK7BeWJBOQIYO-02_b3c1aa6d-9c2e-42b0-b4bf-2a6e9eeb3680; SSONAME=Nitin; _ga=GA1.2.1181178433.1416636901; myclasses=2151; __utma=59190898.1181178433.1416636901.1416879873.1416892730.12; __utmc=59190898; __utmz=59190898.1416892730.12.9.utmcsr=weblogin.asu.edu|utmccn=(referral)|utmcmd=referral|utmcct=/cas/login; _op_aixPageId=a2_bc7be951-8098-4e5e-9f7e-e28594705a98; __utmt=1; __utma=137925942.445756493.1415131804.1416892685.1416929761.52; __utmb=137925942.1.10.1416929761; __utmc=137925942; __utmz=137925942.1415131804.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none)'
         }
     }
 
