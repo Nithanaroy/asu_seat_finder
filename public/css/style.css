@@ -6,3 +6,11 @@ body {
 a {
   color: #00B7FF;
 }
+
+.margin-top-small {
+	margin-top: 10px;
+}
+
+.margin-top-medium {
+	margin-top: 15px;
+}

@@ -10,12 +10,18 @@ block content
 			input#classes.form-control(type='text', placeholder='Class IDs seperated by comma', value="29494, 16402, 16401, 21753, 12442")
 		button#track-btn.btn.btn-success(type='button') Track
 
-	br
-	button#stop-track-btn.btn.btn-danger(type='button') Stop Tracking
+	button#stop-track-btn.btn.btn-danger.margin-top-medium(type='button') Stop Tracking
 
 	br
-	br
-	button#get-status-btn.btn.btn-primary(type='button') Get Status
-
-	br
-	.output
+	button#get-status-btn.btn.btn-primary.margin-top-medium(type='button') Get Status
+	
+	table#output.table.table-striped.table-bordered.table-hover.table-condensed.margin-top-medium
+		thead
+			tr
+				td #
+				td Name
+				td Class#
+				td Available seats
+				td Total seats
+				td Status
+		tbody

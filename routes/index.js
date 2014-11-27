@@ -46,6 +46,7 @@ function set_up_cron_job(classes_to_track) {
 
     // save the job to the globals job
     globals.job = job;
+    console.log('Info: ', 'CRON job up and running');
 }
 
 function fetch_classes_and_email(classes_to_track) {
@@ -53,37 +54,36 @@ function fetch_classes_and_email(classes_to_track) {
     var options = {
         url: 'https://webapp4.asu.edu/catalog/classlist?s=CSE&l=grad&t=2151&e=all&hon=F',
         headers: {
-            'Cookie': 'JSESSIONID=ECE3FDCE540257768FCD592A20BEEC98.catalog2; onlineCampusSelection=C; webfxtab_my-programs-tabs=1; _gaRollUp=GA1.2.1181178433.1416636901; com.silverpop.iMAWebCookie=43e933c2-0284-ab7e-e3b0-e63059023088; __utmt=1; ASUWEBAUTH=ST-5370-mtetFC7xVnTgLyNv160g-05_589091e8-9c61-44f7-911f-4384332b4981; SSONAME=Nitin; __utmt_asu=1; __utma=137925942.445756493.1415131804.1416981354.1417018329.57; __utmb=137925942.1.10.1417018329; __utmc=137925942; __utmz=137925942.1415131804.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none); MOBILE_DETECTION=false; __utmt_myasu=1; _gat=1; myclasses=2147; _ga=GA1.2.1181178433.1416636901; __utma=59190898.1181178433.1416636901.1416966167.1417018270.16; __utmb=59190898.45.9.1417018517038; __utmc=59190898; __utmz=59190898.1416960200.14.10.utmcsr=myasucourses.asu.edu|utmccn=(referral)|utmcmd=referral|utmcct=/webapps/portal/execute/tabs/tabAction; __utmv=59190898.|4=SubDomain%20Tracking=students=1; _op_aixPageId=a2_147b2d41-9bd0-4091-b423-460ec42df934'
+            'Cookie': 'JSESSIONID=EC3F35A352F6FDFDF062F524FD573957.catalog2; onlineCampusSelection=C; webfxtab_my-programs-tabs=1; _gaRollUp=GA1.2.1181178433.1416636901; com.silverpop.iMAWebCookie=43e933c2-0284-ab7e-e3b0-e63059023088; MOBILE_DETECTION=false; myclasses=2147; _ga=GA1.2.1181178433.1416636901; ASUWEBAUTH=ST-918-3I9lff2eRQsKnQbcbOcD-03_73fe8369-660c-471f-bc66-a05b9d419ce1; SSONAME=Nitin; _op_aixPageId=a2_2697e1bf-a83c-42fc-8991-a8d7ca006684; __utma=137925942.445756493.1415131804.1417071250.1417102497.63; __utmb=137925942.1.10.1417102497; __utmc=137925942; __utmz=137925942.1415131804.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none); __utma=59190898.1864929482.1417041412.1417071287.1417102475.5; __utmb=59190898.13.10.1417102475; __utmc=59190898; __utmz=59190898.1417071287.4.14.utmcsr=weblogin.asu.edu|utmccn=(referral)|utmcmd=referral|utmcct=/cas/login; __utmv=59190898.|4=SubDomain%20Tracking=students=1'
         }
     }
 
-    // var deferred = Q.defer();
+    var deferred = Q.defer();
 
     request(options, function(error, response, body) {
-            if (!error && response.statusCode == 200) {
-                // var jquery = fs.readFileSync("./public/components/jquery/dist/jquery.min.js").toString();
-                jsdom.env(
-                    body, ['http://code.jquery.com/jquery.js'],
-                    function(errors, window) {
-                        console.log('Info: ', 'Completed ASU Classes page request');
+        if (!error && response.statusCode == 200) {
+            // var jquery = fs.readFileSync("./public/components/jquery/dist/jquery.min.js").toString();
+            jsdom.env(
+                body, ['http://code.jquery.com/jquery.js'],
+                function(errors, window) {
+                    console.log('Info: ', 'Completed ASU Classes page request');
 
-                        var $ = window.$;
-                        var classes = scrape_asu_page(body, $);
-                        // deferred.resolve(classes);
-                        check_classes_and_email(classes, classes_to_track);
+                    var $ = window.$;
+                    var classes = scrape_asu_page(body, $);
+                    var tracked_classes_status = check_classes_and_email(classes, classes_to_track);
+                    deferred.resolve(tracked_classes_status);
+                }
+            );
+        }
 
-                    }
-                );
-            }
-
-            if (error) {
-                console.log("Error during ASU classes fetch", error);
-                // deferred.reject(errors);
-                send_email_and_stop_job();
-                return;
-            };
-        })
-        // return deferred.promise;
+        if (error) {
+            console.log("Error during ASU classes fetch", error);
+            send_email_and_stop_job();
+            deferred.reject("Error during fetching ASU classes. Possible expired cookie.");
+            return;
+        };
+    })
+    return deferred.promise;
 }
 
 /**
@@ -100,16 +100,19 @@ function send_email_and_stop_job() {
 }
 
 function check_classes_and_email(all_classes, classes_to_track) {
-    var classes_opened = {};
+    var classes_opened = {},
+        tracking_classes = {};
     for (var i = 0; i < classes_to_track.length; i++) {
         var class_id = classes_to_track[i].trim();
         console.log('Info for classid', class_id, all_classes[class_id], all_classes[class_id].available_seats, all_classes[class_id].class_status);
         if (all_classes[class_id] && all_classes[class_id].available_seats > 0 && all_classes[class_id].class_status == 0) {
             classes_opened[class_id] = all_classes[class_id];
         }
+        tracking_classes[class_id] = all_classes[class_id];
     }
     if (Object.keys(classes_opened).length > 0)
         email_about_classes(classes_opened);
+    return tracking_classes;
 }
 
 /**
@@ -131,6 +134,7 @@ function scrape_asu_page(html, $) {
         var class_id = parseInt($(tds).first().text().trim());
         var img_src = $(availability_col).find('img').attr('src');
         var class_status = -1; // 0 = available, 1 = reserved, 2 = unavailable
+        var class_name = $(tds).eq(2).text().trim();
 
         temp = parseInt($(availability_col).find("td:eq(0)").text().trim());
         if (!isNaN(temp)) {
@@ -157,7 +161,8 @@ function scrape_asu_page(html, $) {
         classes[class_id] = {
             'available_seats': available_seats,
             'total_seats': total_seats,
-            'class_status': class_status
+            'class_status': class_status,
+            'name': class_name
         };
     });
     return classes;
@@ -210,10 +215,28 @@ exports.stoptrack = function(req, res) {
 };
 
 exports.getstatus = function(req, res) {
+
+    var job_msg = "";
     if (globals.job) {
         globals.job._callbacks[0]();
-        res.send("Tracking request sent. You will receive an email(s) if any classes open, else no notification will be received");
     } else {
-        res.send("No jobs currently running");
+        set_up_cron_job(classes_to_track);
+        job_msg = "No jobs are currently running.";
     }
+
+    var classes_to_track = req.query.classes;
+    fetch_classes_and_email(classes_to_track).then(function(classes) {
+        res.send({
+            data: classes,
+            status: true,
+            msg: ["You will receive an email(s) if any of the requested classes are open and a CRON job is running", job_msg].join('.<br />')
+        });
+    }, function(error) {
+        res.send({
+            data: error,
+            status: false,
+            msg: error
+        });
+    });
+
 }
