@@ -51,39 +51,55 @@ function set_up_cron_job(classes_to_track) {
 
 function fetch_classes_and_email(classes_to_track) {
     console.log('Method: ', 'Fetch Classes');
-    var options = {
-        url: 'https://webapp4.asu.edu/catalog/classlist?s=CSE&l=grad&t=2151&e=all&hon=F',
-        headers: {
-            'Cookie': 'JSESSIONID=791759595DE2ED561EDE3F13AF6E5F15.catalog2; onlineCampusSelection=C; webfxtab_my-programs-tabs=1; _gaRollUp=GA1.2.1181178433.1416636901; com.silverpop.iMAWebCookie=43e933c2-0284-ab7e-e3b0-e63059023088; MOBILE_DETECTION=false; myclasses=2147; __utmt=1; ASUWEBAUTH=ST-4953-tClmrBnws9JiMgsrIhcG-04_54fa9f6b-3b00-401f-a93d-dac1c2aa20dc; SSONAME=Nitin; __utmt_asu=1; _gat=1; _op_aixPageId=a2_d4cf1390-f02f-4933-900c-f5921029b1ca; __utma=59190898.1864929482.1417041412.1417583052.1417621553.27; __utmb=59190898.43.10.1417621553; __utmc=59190898; __utmz=59190898.1417476079.19.19.utmcsr=google|utmccn=(organic)|utmcmd=organic|utmctr=(not%20provided); __utmv=59190898.|4=SubDomain%20Tracking=students%7Cwpcarey=1; _ga=GA1.2.1181178433.1416636901; __utma=137925942.445756493.1415131804.1417566519.1417622112.79; __utmb=137925942.1.10.1417622112; __utmc=137925942; __utmz=137925942.1415131804.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none)'
-        }
-    }
 
     var deferred = Q.defer();
 
-    request(options, function(error, response, body) {
-        if (!error && response.statusCode == 200) {
-            // var jquery = fs.readFileSync("./public/components/jquery/dist/jquery.min.js").toString();
-            jsdom.env(
-                body, ['http://code.jquery.com/jquery.js'],
-                function(errors, window) {
-                    console.log('Info: ', 'Completed ASU Classes page request');
-
-                    var $ = window.$;
-                    var classes = scrape_asu_page(body, $);
-                    var tracked_classes_status = check_classes_and_email(classes, classes_to_track);
-                    deferred.resolve(tracked_classes_status);
-                }
-            );
-        }
-
-        if (error) {
-            console.log("Error during ASU classes fetch", error);
-            send_email_and_stop_job();
-            deferred.reject("Error during fetching ASU classes. Possible expired cookie.");
+    var jsession_id_url = 'https://dl.dropboxusercontent.com/u/95923404/asu_classes_session_id.txt';
+    request(jsession_id_url, function(err, res, jsession_id) {
+        if (err) {
+            var msg = "Couldn't fetch jsession id. May have to manually provide.";
+            handle_error(msg, msg);
             return;
         };
-    })
+
+        console.log('Info: ', 'Fetched JSESSION_ID');
+        var options = {
+            url: 'https://webapp4.asu.edu/catalog/classlist?s=CSE&l=grad&t=2151&e=all&hon=F',
+            headers: {
+                'Cookie': jsession_id
+            }
+        }
+
+        request(options, function(error, response, body) {
+            if (!error && response.statusCode == 200) {
+                // var jquery = fs.readFileSync("./public/components/jquery/dist/jquery.min.js").toString();
+                jsdom.env(
+                    body, ['http://code.jquery.com/jquery.js'],
+                    function(errors, window) {
+                        console.log('Info: ', 'Completed ASU Classes page request');
+
+                        var $ = window.$;
+                        var classes = scrape_asu_page(body, $);
+                        var tracked_classes_status = check_classes_and_email(classes, classes_to_track);
+                        deferred.resolve(tracked_classes_status);
+                    }
+                );
+            }
+
+            if (error) {
+                handle_error("Error during fetching ASU classes. Possible expired cookie.", "Renew Cookie!");
+                return;
+            };
+        })
+    });
+
     return deferred.promise;
+}
+
+function handle_error(msg, email_msg) {
+    console.log('Error: ', msg, error);
+    send_email_and_stop_job(email_msg);
+    deferred.reject(msg);
 }
 
 /**
@@ -91,8 +107,8 @@ function fetch_classes_and_email(classes_to_track) {
  * is no longer active, we stop the job as well.
  * @return {[type]}
  */
-function send_email_and_stop_job() {
-    send_email("Renew Cookie!");
+function send_email_and_stop_job(email_msg) {
+    send_email(email_msg);
     if (globals.job) {
         globals.job.stop();
         console.log("Stopped the job as scraping failed");
