@@ -81,4 +81,9 @@ $(function() {
             sno = sno + 1;
         }
     }
+
+    // call get status every one hour to prevent heroku from sleeping
+    var t = setInterval(function() {
+        $("#get-status-btn").trigger('click');
+    }, 1 * 60 * 60 * 1000);
 });
