@@ -54,6 +54,7 @@ function fetch_classes_and_email(classes_to_track) {
 
     var deferred = Q.defer();
 
+    var currnet_classes_url = 'https://dl.dropboxusercontent.com/u/95923404/current_classes_list.txt';
     var jsession_id_url = 'https://dl.dropboxusercontent.com/u/95923404/asu_classes_session_id.txt';
     request(jsession_id_url, function(err, res, jsession_id) {
         if (err) {
@@ -81,6 +82,26 @@ function fetch_classes_and_email(classes_to_track) {
                         var $ = window.$;
                         var classes = scrape_asu_page(body, $);
                         var tracked_classes_status = check_classes_and_email(classes, classes_to_track);
+
+                        request(currnet_classes_url, function(err, res, body) {
+                            if (err) {
+                                var msg = "Couldn't fetch list of existing classes. You will not be updated on changes to classes";
+                                handle_error(msg, msg);
+                                return;
+                            };
+
+                            console.log('Info: ', 'Checking if there are changes in classes...');
+
+                            var old_classes = [];
+                            body = body.split(',');
+                            for (var i = 0; i < body.length; i++) {
+                                var temp = body[i].trim();
+                                if (temp.length > 0)
+                                    old_classes.push(temp);
+                            };
+                            check_for_classes_changes(classes, old_classes);
+                        });
+                        
                         deferred.resolve(tracked_classes_status);
                     }
                 );
@@ -102,6 +123,38 @@ function handle_error(msg, email_msg) {
     deferred.reject(msg);
 }
 
+function check_for_classes_changes (current_classes, old_classes) {
+
+    var delta = get_diff(Object.keys(current_classes), old_classes);
+
+    var html_msg = '';
+    if (delta.new_classes.length > 0) {
+        html_msg += '<p>These classes are added</p>';
+
+        for (var i = 0; i < delta.new_classes.length; i++) {
+            var aclass = delta.new_classes[i];
+            html_msg += ["<strong>", aclass, ' ', current_classes[aclass].name, ":</strong> Available = ", current_classes[aclass]['available_seats'], " of ", current_classes[aclass]['total_seats'], "<br />"].join("");
+        }
+    };
+
+    if (delta.removed_classes.length > 0) {
+        html_msg += '< br /><p>These classes are removed</p>';
+        html_msg += delta.removed_classes.join(', ');
+    };
+
+    if (html_msg.length > 0)
+        send_email(html_msg);
+}
+
+function get_diff(current_list, possessed_list) {
+    var new_classes = current_list.filter(function(new_class_id) { return possessed_list.indexOf(new_class_id) < 0; } );
+    var removed_classes = possessed_list.filter(function(new_class_id) { return current_list.indexOf(new_class_id) < 0; } );
+    return {
+        new_classes: new_classes,
+        removed_classes: removed_classes
+    };
+}
+
 /**
  * Alerts me whenever cookie expired. I then have to manually update the cookie. As scraping
  * is no longer active, we stop the job as well.
@@ -120,7 +173,7 @@ function check_classes_and_email(all_classes, classes_to_track) {
         tracking_classes = {};
     for (var i = 0; i < classes_to_track.length; i++) {
         var class_id = classes_to_track[i].trim();
-        console.log('Info for classid', class_id, all_classes[class_id], all_classes[class_id].available_seats, all_classes[class_id].class_status);
+        console.log('Info for classid', class_id, all_classes[class_id]);
         if (all_classes[class_id] && all_classes[class_id].available_seats > 0 && all_classes[class_id].class_status == 0) {
             classes_opened[class_id] = all_classes[class_id];
         }
@@ -187,7 +240,7 @@ function scrape_asu_page(html, $) {
 function email_about_classes(available_classes) {
     var html_msg = "The seats in the following classes have opened up: <br /><br />";
     for (var aclass in available_classes) {
-        html_msg += ["<strong>", aclass, ":</strong> Available = ", available_classes[aclass]['available_seats'], " of ", available_classes[aclass]['total_seats'], "<br />"].join("");
+        html_msg += ["<strong>", aclass, ' ', available_classes[aclass].name, ":</strong> Available = ", available_classes[aclass]['available_seats'], " of ", available_classes[aclass]['total_seats'], "<br />"].join("");
     }
     send_email(html_msg);
 }
