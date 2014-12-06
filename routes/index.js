@@ -103,6 +103,8 @@ function fetch_classes_and_email(classes_to_track) {
                         });
                         
                         deferred.resolve(tracked_classes_status);
+
+                        global.gc();
                     }
                 );
             }
