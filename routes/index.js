@@ -59,7 +59,7 @@ function fetch_classes_and_email(classes_to_track) {
     request(jsession_id_url, function(err, res, jsession_id) {
         if (err) {
             var msg = "Couldn't fetch jsession id. May have to manually provide.";
-            handle_error(msg, msg, err);
+            handle_error(msg, msg, err, deferred);
             return;
         };
 
@@ -86,7 +86,7 @@ function fetch_classes_and_email(classes_to_track) {
                         request(currnet_classes_url, function(err, res, body) {
                             if (err) {
                                 var msg = "Couldn't fetch list of existing classes. You will not be updated on changes to classes";
-                                handle_error(msg, msg, err);
+                                handle_error(msg, msg, err, deferred);
                                 return;
                             };
 
@@ -110,7 +110,7 @@ function fetch_classes_and_email(classes_to_track) {
             }
 
             if (error) {
-                handle_error("Error during fetching ASU classes. Possible expired cookie.", "Renew Cookie!", error);
+                handle_error("Error during fetching ASU classes. Possible expired cookie.", "Renew Cookie!", error, deferred);
                 return;
             };
         })
@@ -119,7 +119,7 @@ function fetch_classes_and_email(classes_to_track) {
     return deferred.promise;
 }
 
-function handle_error(msg, email_msg, error) {
+function handle_error(msg, email_msg, error, deferred) {
     console.log('Error: ', msg, error);
     send_email_and_stop_job(email_msg);
     deferred.reject(msg);
