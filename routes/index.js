@@ -173,6 +173,7 @@ function send_email_and_stop_job(email_msg) {
 function check_classes_and_email(all_classes, classes_to_track) {
     var classes_opened = {},
         tracking_classes = {};
+        if (!classes_to_track) { return {}};
     for (var i = 0; i < classes_to_track.length; i++) {
         var class_id = classes_to_track[i].trim();
         console.log('Info for classid', class_id, all_classes[class_id]);
