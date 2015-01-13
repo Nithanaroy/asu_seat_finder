@@ -90,16 +90,18 @@ function fetch_classes_and_email(classes_to_track) {
                                 return;
                             };
 
-                            console.log('Info: ', 'Checking if there are changes in classes...');
+                            /* Commenting the check for new classes
+                                console.log('Info: ', 'Checking if there are changes in classes...');
 
-                            var old_classes = [];
-                            body = body.split(',');
-                            for (var i = 0; i < body.length; i++) {
-                                var temp = body[i].trim();
-                                if (temp.length > 0)
-                                    old_classes.push(temp);
-                            };
-                            check_for_classes_changes(classes, old_classes);
+                                var old_classes = [];
+                                body = body.split(',');
+                                for (var i = 0; i < body.length; i++) {
+                                    var temp = body[i].trim();
+                                    if (temp.length > 0)
+                                        old_classes.push(temp);
+                                };
+                                check_for_classes_changes(classes, old_classes);
+                            */
                         });
                         
                         deferred.resolve(tracked_classes_status);
