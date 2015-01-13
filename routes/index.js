@@ -68,7 +68,8 @@ function fetch_classes_and_email(classes_to_track) {
             url: 'https://webapp4.asu.edu/catalog/classlist?s=CSE&l=grad&t=2151&e=all&hon=F',
             headers: {
                 'Cookie': jsession_id
-            }
+            },
+            timeout: 30000
         }
 
         request(options, function(error, response, body) {
