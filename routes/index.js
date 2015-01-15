@@ -65,7 +65,7 @@ function fetch_classes_and_email(classes_to_track) {
 
         console.log('Info: ', 'Fetched JSESSION_ID');
         var options = {
-            url: 'https://webapp4.asu.edu/catalog/classlist?s=CSE&l=grad&t=2151&e=all&hon=F',
+            url: 'https://webapp4.asu.edu/catalog/classlist?s=CSE&t=2151&e=all',
             headers: {
                 'Cookie': jsession_id
             },
