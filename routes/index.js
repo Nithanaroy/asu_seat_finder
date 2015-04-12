@@ -65,7 +65,7 @@ function fetch_classes_and_email(classes_to_track) {
 
         console.log('Info: ', 'Fetched JSESSION_ID');
         var options = {
-            url: 'https://webapp4.asu.edu/catalog/classlist?s=CSE&l=grad&t=2157&e=all&hon=F',
+            url: 'https://webapp4.asu.edu/catalog/classlist?c=TEMPE&s=CSE&l=grad&t=2157&e=all&hon=F',
             headers: {
                 'Cookie': jsession_id
             },
@@ -82,6 +82,13 @@ function fetch_classes_and_email(classes_to_track) {
 
                         var $ = window.$;
                         var classes = scrape_asu_page(body, $);
+
+                        if (Object.keys(classes).length === 0) {
+                            var msg = "Error during fetching ASU classes. Possible expired cookie.";
+                            handle_error(msg, "Renew Cookie!", null, deferred);
+                            return;
+                        };
+
                         var tracked_classes_status = check_classes_and_email(classes, classes_to_track);
 
                         request(currnet_classes_url, function(err, res, body) {
@@ -91,21 +98,21 @@ function fetch_classes_and_email(classes_to_track) {
                                 return;
                             };
 
-                                // The check for new classes
-                                console.log('Info: ', 'Checking if there are changes in classes...');
-                                var old_classes = [];
-                                body = body.split(',');
-                                for (var i = 0; i < body.length; i++) {
-                                    var temp = body[i].trim();
-                                    if (temp.length > 0)
-                                        old_classes.push(temp);
-                                };
-                                check_for_classes_changes(classes, old_classes);
+                            // The check for new classes
+                            console.log('Info: ', 'Checking if there are changes in classes...');
+                            var old_classes = [];
+                            body = body.split(',');
+                            for (var i = 0; i < body.length; i++) {
+                                var temp = body[i].trim();
+                                if (temp.length > 0)
+                                    old_classes.push(temp);
+                            };
+                            check_for_classes_changes(classes, old_classes);
 
-                                console.log('Info: ', 'Done serving the request\n');
-                            
+                            console.log('Info: ', 'Done serving the request\n');
+
                         });
-                    
+
                         deferred.resolve(tracked_classes_status);
 
                         global.gc();
@@ -114,7 +121,8 @@ function fetch_classes_and_email(classes_to_track) {
             }
 
             if (error) {
-                handle_error("Error during fetching ASU classes. Possible expired cookie.", "Renew Cookie!", error, deferred);
+                var msg = "Error during fetching ASU classes. Possible expired cookie.";
+                handle_error(msg, "Renew Cookie!", error, deferred);
                 return;
             };
         })
@@ -129,7 +137,7 @@ function handle_error(msg, email_msg, error, deferred) {
     deferred.reject(msg);
 }
 
-function check_for_classes_changes (current_classes, old_classes) {
+function check_for_classes_changes(current_classes, old_classes) {
 
     var delta = get_diff(Object.keys(current_classes), old_classes);
 
@@ -155,8 +163,12 @@ function check_for_classes_changes (current_classes, old_classes) {
 }
 
 function get_diff(current_list, possessed_list) {
-    var new_classes = current_list.filter(function(new_class_id) { return possessed_list.indexOf(new_class_id) < 0; } );
-    var removed_classes = possessed_list.filter(function(new_class_id) { return current_list.indexOf(new_class_id) < 0; } );
+    var new_classes = current_list.filter(function(new_class_id) {
+        return possessed_list.indexOf(new_class_id) < 0;
+    });
+    var removed_classes = possessed_list.filter(function(new_class_id) {
+        return current_list.indexOf(new_class_id) < 0;
+    });
     return {
         new_classes: new_classes,
         removed_classes: removed_classes
@@ -179,7 +191,9 @@ function send_email_and_stop_job(email_msg) {
 function check_classes_and_email(all_classes, classes_to_track) {
     var classes_opened = {},
         tracking_classes = {};
-        if (!classes_to_track) { return {}};
+    if (!classes_to_track) {
+        return {}
+    };
     for (var i = 0; i < classes_to_track.length; i++) {
         var class_id = classes_to_track[i].trim();
         console.log('Info for classid', class_id, all_classes[class_id]);
@@ -245,7 +259,7 @@ function scrape_asu_page(html, $) {
     });
 
     // print classes for updating the current_classes_list.txt in dropbox
-    // console.log(Object.keys(classes));
+    console.log("Classes: ", Object.keys(classes));
 
     return classes;
 }
@@ -302,7 +316,7 @@ exports.getstatus = function(req, res) {
     if (globals.job) {
         globals.job._callbacks[0]();
     } else {
-        set_up_cron_job(classes_to_track);
+        // set_up_cron_job(classes_to_track);
         job_msg = "No jobs are currently running.";
     }
 
