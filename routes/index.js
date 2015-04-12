@@ -24,7 +24,7 @@ exports.track = function(req, res) {
 
 function set_up_cron_job(classes_to_track) {
 
-    console.log('Method: ', 'Setting up CRON');
+    console.log('\nMethod: ', 'Setting up CRON');
 
     var job = globals.job;
 
@@ -35,7 +35,7 @@ function set_up_cron_job(classes_to_track) {
     };
 
     job = new CronJob({
-        cronTime: '0 */15 * * * *',
+        cronTime: '0 */3 * * * *',
         onTick: function() {
             console.log('\r\n', new Date(), "Running CRON");
             fetch_classes_and_email(classes_to_track);
@@ -65,7 +65,7 @@ function fetch_classes_and_email(classes_to_track) {
 
         console.log('Info: ', 'Fetched JSESSION_ID');
         var options = {
-            url: 'https://webapp4.asu.edu/catalog/classlist?s=CSE&l=grad&t=2151&e=all&hon=F',
+            url: 'https://webapp4.asu.edu/catalog/classlist?s=CSE&l=grad&t=2157&e=all&hon=F',
             headers: {
                 'Cookie': jsession_id
             },
@@ -91,9 +91,8 @@ function fetch_classes_and_email(classes_to_track) {
                                 return;
                             };
 
-                            /* Commenting the check for new classes
+                                // The check for new classes
                                 console.log('Info: ', 'Checking if there are changes in classes...');
-
                                 var old_classes = [];
                                 body = body.split(',');
                                 for (var i = 0; i < body.length; i++) {
@@ -102,9 +101,11 @@ function fetch_classes_and_email(classes_to_track) {
                                         old_classes.push(temp);
                                 };
                                 check_for_classes_changes(classes, old_classes);
-                            */
+
+                                console.log('Info: ', 'Done serving the request\n');
+                            
                         });
-                        
+                    
                         deferred.resolve(tracked_classes_status);
 
                         global.gc();
@@ -147,8 +148,10 @@ function check_for_classes_changes (current_classes, old_classes) {
         html_msg += delta.removed_classes.join(', ');
     };
 
-    if (html_msg.length > 0)
+    if (html_msg.length > 0) {
+        console.log('Info: ', 'Found a change in classes. Sending an email');
         send_email(html_msg);
+    }
 }
 
 function get_diff(current_list, possessed_list) {
@@ -240,6 +243,10 @@ function scrape_asu_page(html, $) {
             'name': class_name
         };
     });
+
+    // print classes for updating the current_classes_list.txt in dropbox
+    // console.log(Object.keys(classes));
+
     return classes;
 }
 
